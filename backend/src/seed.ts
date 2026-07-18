@@ -1,6 +1,6 @@
-import { connectDB, disconnectDB } from '../src/config/database';
-import { User } from '../src/models/User';
-import { Employee } from '../src/models/Employee';
+import { connectDB, disconnectDB } from './config/database';
+import { User } from './models/User';
+import { Employee } from './models/Employee';
 import { hashPassword } from './utils/bcrypt';
 
 

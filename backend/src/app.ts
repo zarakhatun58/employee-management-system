@@ -2,11 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import path from 'path';
-import { config } from '../src/config/env';
-import authRoutes from '../src/routes/auth.routes';
-import employeeRoutes from '../src/routes/employee.routes';
-import organizationRoutes from '../src/routes/organization.routes';
-import dashboardRoutes from '../src/routes/dashboard.routes';
+import { config } from './config/env';
+import authRoutes from './routes/auth.routes';
+import employeeRoutes from './routes/employee.routes';
+import organizationRoutes from './routes/organization.routes';
+import dashboardRoutes from './routes/dashboard.routes';
 import { errorHandler, notFound } from './middleware/error.middleware';
 
 export function createApp() {

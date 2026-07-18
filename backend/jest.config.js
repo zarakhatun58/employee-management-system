@@ -1,10 +1,22 @@
 module.exports = {
-    preset: "ts-jest",
-    testEnvironment: "node",
+  preset: "ts-jest",
 
-    roots: ["<rootDir>/tests"],
+  testEnvironment: "node",
 
-    moduleNameMapper: {
-        "^@/(.*)$": "<rootDir>/src/$1"
+  roots: ["<rootDir>/tests"],
+
+  moduleFileExtensions: [
+    "ts",
+    "js"
+  ],
+
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1"
+  },
+
+  globals: {
+    "ts-jest": {
+      tsconfig: "tsconfig.test.json"
     }
+  }
 };
