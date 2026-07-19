@@ -2,7 +2,7 @@ export type Role = "super_admin" | "hr" | "employee";
 export type EmployeeStatus = "active" | "inactive";
 
 export interface User {
-  id: string;
+ id: string;
   name: string;
   email: string;
   role: Role;
@@ -10,8 +10,7 @@ export interface User {
 }
 
 export interface Employee {
-  id?: string;
-  _id?: string;
+   id: string;
   employeeId: string;
   name: string;
   email: string;
@@ -20,12 +19,11 @@ export interface Employee {
   designation: string;
   salary: number;
   joiningDate: string;
-  status: EmployeeStatus;
-  role: Role;
-  reportingManager?: string | null;
+  status: "active" | "inactive";
+  role: "super_admin" | "hr" | "employee";
+  reportingManager: string | null;
   reportingManagerName?: string | null;
   profileImage?: string | null;
-  deleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -52,15 +50,18 @@ export interface TreeNode {
   _id: string;
   employeeId: string;
   name: string;
-  email?: string;
-  phone?: string;
   designation: string;
   department: string;
   role: Role;
+  email?: string;
+  phone?: string;
   profileImage?: string | null;
   children: TreeNode[];
 }
-
+export interface OrganizationResponse {
+  success: boolean;
+  data: TreeNode[];
+}
 export interface DashboardStats {
   totalEmployees: number;
   activeEmployees: number;
@@ -81,18 +82,24 @@ export interface DashboardStats {
 }
 
 export interface AuthResponse {
+  success: boolean;
+  message: string;
   token: string;
-  refreshToken?: string;
   user: User;
 }
-
-export interface PaginatedEmployees {
-  data: Employee[];
-  total: number;
-  page: number;
-  pages: number;
-  limit: number;
-}
+// export interface PaginatedEmployees {
+//   success: boolean;
+//   message: string;
+//   data: Employee[];
+//   pagination: {
+//     total: number;
+//     page: number;
+//     limit: number;
+//     pages: number;
+//     hasNext: boolean;
+//     hasPrevious: boolean;
+//   };
+// }
 
 export interface ApiError {
   message: string;

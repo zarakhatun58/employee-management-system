@@ -2,8 +2,10 @@ import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '../store/auth.store';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
-  headers: { 'Content-Type': 'application/json' },
+baseURL: 'https://employee-management-system-enig.onrender.com/api',
+    headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 api.interceptors.request.use((config) => {

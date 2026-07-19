@@ -32,7 +32,7 @@ const nodeTypes = {
 };
 
 const CARD_WIDTH = 290;
-const LEVEL_HEIGHT = 180;
+const LEVEL_HEIGHT = 100;
 
 export default function OrganizationChart({ forest }: Props) {
     return (
@@ -49,25 +49,36 @@ function Chart({ forest }: Props) {
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
     const [selectedEmployee, setSelectedEmployee] = useState<TreeNode | null>(null);
-
+    const [department, setDepartment] = useState("");
+    const [role, setRole] = useState("");
+    const [sort, setSort] = useState("name");
     const [drawerOpen, setDrawerOpen] = useState(false);
     useEffect(() => {
-        setExpandedNodes(new Set(forest.map((item) => item._id)));
+        const ids = new Set<string>();
+        const collect = (node: TreeNode) => {
+            ids.add(node._id);
+            node.children?.forEach(collect);
+        };
+        forest.forEach(collect);
+        setExpandedNodes(ids);
     }, [forest]);
     useEffect(() => {
         const flowNodes: Node[] = [];
         const flowEdges: Edge[] = [];
 
         let currentX = 0;
-
         const buildTree = (
             employee: TreeNode,
             level: number,
             parentId?: string
         ): number => {
+            const children = employee.children ?? [];
             const startX = currentX;
 
-            if (employee.children.length === 0) {
+            // ===========================
+            // LEAF NODE
+            // ===========================
+            if (children.length === 0) {
                 currentX += CARD_WIDTH + 40;
 
                 flowNodes.push({
@@ -79,8 +90,7 @@ function Chart({ forest }: Props) {
                     },
                     data: {
                         ...employee,
-
-                        reports: employee.children.length,
+                        reports: 0,
 
                         expanded: expandedNodes.has(employee._id),
 
@@ -116,11 +126,17 @@ function Chart({ forest }: Props) {
                         },
                     });
                 }
+
                 return startX;
             }
+
+            // ===========================
+            // MANAGER NODE
+            // ===========================
             const childPositions: number[] = [];
+
             if (expandedNodes.has(employee._id)) {
-                employee.children.forEach((child) => {
+                children.forEach((child) => {
                     const x = buildTree(
                         child,
                         level + 1,
@@ -146,7 +162,29 @@ function Chart({ forest }: Props) {
                 },
                 data: {
                     ...employee,
-                    reports: employee.children.length,
+
+                    reports: children.length,
+
+                    expanded: expandedNodes.has(employee._id),
+
+                    onClick: () => {
+                        setSelectedEmployee(employee);
+                        setDrawerOpen(true);
+                    },
+
+                    onToggle: () => {
+                        setExpandedNodes((prev) => {
+                            const next = new Set(prev);
+
+                            if (next.has(employee._id)) {
+                                next.delete(employee._id);
+                            } else {
+                                next.add(employee._id);
+                            }
+
+                            return next;
+                        });
+                    },
                 },
             });
 
@@ -169,7 +207,17 @@ function Chart({ forest }: Props) {
             buildTree(root, 0);
             currentX += 120;
         });
+        console.log("Forest:", forest);
+        console.table(
+            forest.map((e: any) => ({
+                id: e._id,
+                name: e.name,
+            }))
+        );
         const layout = getLayoutedElements(flowNodes, flowEdges);
+        console.log("FLOW NODES", flowNodes);
+        console.log("FLOW EDGES", flowEdges);
+        console.log("NODE COUNT", flowNodes.length);
         setNodes(layout.nodes);
         setEdges(layout.edges);
     }, [forest, setNodes, setEdges, expandedNodes,]);
@@ -216,12 +264,26 @@ function Chart({ forest }: Props) {
             strokeWidth: 2,
         },
     };
+    const departments = Array.from(
+        new Set(
+            nodes.map(
+                (node: any) => node.data.department
+            )
+        )
+    );
 
     return (
         <>
             <OrganizationToolbar
                 search={search}
                 setSearch={setSearch}
+                department={department}
+                setDepartment={setDepartment}
+                role={role}
+                setRole={setRole}
+                sort={sort}
+                setSort={setSort}
+                departments={departments}
                 totalEmployees={nodes.length}
                 onZoomIn={() => zoomIn()}
                 onZoomOut={() => zoomOut()}
@@ -255,7 +317,7 @@ function Chart({ forest }: Props) {
                         nodeBorderRadius={8}
                         maskColor="rgba(15,23,42,.15)"
                         style={{
-                            background: "#fff",
+                            background: "#efd0d0",
                             borderRadius: 12,
                             border: "1px solid #e2e8f0",
                         }}

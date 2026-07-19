@@ -72,8 +72,22 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
   );
 }
 
-export function Label({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <label className={cn('mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300', className)}>{children}</label>;
+export function Label({
+  children,
+  htmlFor,
+  className,
+}: React.LabelHTMLAttributes<HTMLLabelElement>) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      className={cn(
+        "mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300",
+        className
+      )}
+    >
+      {children}
+    </label>
+  );
 }
 
 export function EmptyState({ icon, title, description, action }: { icon?: React.ReactNode; title: string; description?: string; action?: React.ReactNode }) {

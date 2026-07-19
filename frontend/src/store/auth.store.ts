@@ -26,47 +26,15 @@ interface AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   getMe: () => Promise<void>;
+
+  updateProfile: (
+    data: {
+      name: string;
+      email: string;
+    }
+  ) => Promise<boolean>;
   clearError: () => void;
 }
-const demoUsers: Array<{
-  email: string;
-  password: string;
-  user: User;
-}> = [
-    {
-      email: "admin@ems.com",
-      password: "Admin@123",
-      user: {
-        id: "1",
-        name: "Super Admin",
-        email: "admin@ems.com",
-        role: "super_admin" as Role,
-        employee: null,
-      },
-    },
-    {
-      email: "hr@ems.com",
-      password: "Hr@12345",
-      user: {
-        id: "2",
-        name: "HR Manager",
-        email: "hr@ems.com",
-        role: "hr" as Role,
-        employee: null,
-      },
-    },
-    {
-      email: "alice@ems.com",
-      password: "Alice@123",
-      user: {
-        id: "3",
-        name: "Alice Employee",
-        email: "alice@ems.com",
-        role: "employee" as Role,
-        employee: null,
-      },
-    },
-  ];
 
 
 export const useAuthStore = create<AuthState>()(
@@ -93,32 +61,23 @@ export const useAuthStore = create<AuthState>()(
 
 
         try {
+          const res = await authService.register({
+            name,
+            email,
+            password,
+            role,
+          });
 
-          const res =
-            await authService.register({
-              name,
-              email,
-              password
-            });
-
-
-          localStorage.setItem(
-            'token',
-            res.token
-          );
+          localStorage.setItem("token", res.token);
 
           localStorage.setItem(
-            'user',
+            "user",
             JSON.stringify(res.user)
           );
 
           set({
             token: res.token,
-            refreshToken: res.refreshToken ?? null,
-            user: {
-              ...res.user,
-              role: res.user.role as Role,
-            },
+            user: res.user,
             loading: false,
           });
           return true;
@@ -147,88 +106,31 @@ export const useAuthStore = create<AuthState>()(
           error: null,
         });
 
-
         try {
+          const res = await authService.login({
+            email,
+            password,
+          });
 
-          // First try backend API
-          try {
+          localStorage.setItem("token", res.token);
 
-            const res = await authService.login({
-              email,
-              password,
-            });
-
-
-            localStorage.setItem(
-              'token',
-              res.token
-            );
-
-            localStorage.setItem(
-              'user',
-              JSON.stringify(res.user)
-            );
-
-
-            set({
-              token: res.token,
-              user: res.user,
-              loading: false,
-            });
-
-
-            return true;
-
-          } catch {
-
-            // Demo login fallback
-            const demo = demoUsers.find(
-              (item) =>
-                item.email === email &&
-                item.password === password
-            );
-
-
-            if (!demo) {
-              throw new Error(
-                'Invalid email or password'
-              );
-            }
-
-
-            const demoToken =
-              'demo-token-' + Date.now();
-
-
-            localStorage.setItem(
-              'token',
-              demoToken
-            );
-
-
-            localStorage.setItem(
-              'user',
-              JSON.stringify(demo.user)
-            );
-
-
-            set({
-              token: demoToken,
-              user: demo.user,
-              loading: false,
-            });
-
-
-            return true;
-          }
-
-
-        } catch (err: any) {
+          localStorage.setItem(
+            "user",
+            JSON.stringify(res.user)
+          );
 
           set({
+            token: res.token,
+            user: res.user,
+            loading: false,
+          });
+
+          return true;
+        } catch (err: any) {
+          set({
             error:
-              err.message ||
-              'Login failed',
+              err.response?.data?.message ??
+              "Login failed",
             loading: false,
           });
 
@@ -248,7 +150,7 @@ export const useAuthStore = create<AuthState>()(
           const { data } = await api.get("/auth/me");
 
           set({
-            user: data.user ?? data,
+            user: data.user,
           });
         } catch {
           set({
@@ -256,6 +158,37 @@ export const useAuthStore = create<AuthState>()(
             refreshToken: null,
             user: null,
           });
+        }
+      },
+      updateProfile: async (data) => {
+        set({
+          loading: true,
+          error: null,
+        });
+
+        try {
+          const res = await authService.updateProfile(data);
+
+          localStorage.setItem(
+            "user",
+            JSON.stringify(res.user)
+          );
+
+          set({
+            user: res.user,
+            loading: false,
+          });
+
+          return true;
+        } catch (err: any) {
+          set({
+            error:
+              err.response?.data?.message ??
+              "Failed to update profile",
+            loading: false,
+          });
+
+          return false;
         }
       },
 

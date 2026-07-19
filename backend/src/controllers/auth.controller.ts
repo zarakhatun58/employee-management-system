@@ -144,4 +144,23 @@ async register(
       next(error);
     }
   },
+  async updateProfile(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const result = await authService.updateProfile(
+      req.user!.userId,
+      {
+        name: req.body.name,
+        email: req.body.email,
+      }
+    );
+
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+}
 };

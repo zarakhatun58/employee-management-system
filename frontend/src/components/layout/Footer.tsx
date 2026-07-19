@@ -1,4 +1,5 @@
-import { Dot } from "lucide-react";
+
+import { FaLinkedin, FaGithub } from "react-icons/fa";
 
 
 
@@ -27,7 +28,7 @@ export default function Footer() {
             className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition-all duration-200 hover:border-sky-600 hover:bg-sky-600 hover:text-white dark:border-slate-700 dark:text-slate-300"
             aria-label="LinkedIn"
           >
-            <Dot className="h-5 w-5" /> Linkedin
+            <FaLinkedin className="h-5 w-5" />
           </button>
 
           <button
@@ -42,7 +43,7 @@ export default function Footer() {
             className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition-all duration-200 hover:border-slate-900 hover:bg-slate-900 hover:text-white dark:border-slate-700 dark:text-slate-300 dark:hover:bg-white dark:hover:text-slate-900"
             aria-label="GitHub"
           >
-           <Dot className="h-5 w-5" /> GitHub
+           <FaGithub className="h-5 w-5" />
           </button>
         </div>
       </div>

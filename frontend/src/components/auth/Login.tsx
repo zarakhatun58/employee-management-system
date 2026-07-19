@@ -4,6 +4,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { Button, Input, Label, Spinner } from '../ui/primitives';
 import { Briefcase, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../../store/auth.store';
+import toast from 'react-hot-toast';
 
 interface DemoAccount {
   label: string;
@@ -27,13 +28,126 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
+  const [loginErrors, setLoginErrors] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [registerErrors, setRegisterErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   if (token) return <Navigate to="/dashboard" replace />;
-  const onRegister = async (e: FormEvent) => { e.preventDefault(); if (registerPassword !== confirmPassword) { return; } const ok = await register(name, registerEmail, registerPassword); if (ok) { navigate('/dashboard'); } };
+
+  const onRegister = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const errors = {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    };
+
+    let valid = true;
+
+    if (!name.trim()) {
+      errors.name = "Name is required";
+      valid = false;
+    }
+
+    if (!registerEmail.trim()) {
+      errors.email = "Email is required";
+      valid = false;
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerEmail)
+    ) {
+      errors.email = "Enter a valid email";
+      valid = false;
+    }
+
+    if (!registerPassword) {
+      errors.password = "Password is required";
+      valid = false;
+    } else if (registerPassword.length < 6) {
+      errors.password =
+        "Password must be at least 6 characters";
+      valid = false;
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword =
+        "Confirm password is required";
+      valid = false;
+    } else if (
+      registerPassword !== confirmPassword
+    ) {
+      errors.confirmPassword =
+        "Passwords do not match";
+      valid = false;
+    }
+
+    setRegisterErrors(errors);
+
+    if (!valid) return;
+
+    const ok = await register(
+      name,
+      registerEmail,
+      registerPassword
+    );
+
+    if (ok) {
+      toast.success("Registration successful 🎉");
+      navigate("/dashboard");
+    } else {
+      toast.error(error || "Registration failed");
+    }
+  };
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    const errors = {
+      email: "",
+      password: "",
+    };
+
+    let valid = true;
+
+    if (!email.trim()) {
+      errors.email = "Email is required";
+      valid = false;
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+      errors.email = "Enter a valid email";
+      valid = false;
+    }
+
+    if (!password.trim()) {
+      errors.password = "Password is required";
+      valid = false;
+    } else if (password.length < 6) {
+      errors.password =
+        "Password must be at least 6 characters";
+      valid = false;
+    }
+
+    setLoginErrors(errors);
+
+    if (!valid) return;
+
     const ok = await login(email, password);
-    if (ok) navigate('/dashboard');
+
+    if (ok) {
+      toast.success("Login successful 🎉");
+      navigate("/dashboard");
+    } else {
+      toast.error(error || "Invalid email or password");
+    }
   };
 
   const fill = (a: DemoAccount) => {
@@ -49,60 +163,104 @@ export default function Login() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-600 shadow-lg shadow-sky-600/30">
             <Briefcase className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Employee Management System</h1>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Employee Management System</h1>
+          {/* <p className="mt-2 text-slate-500 dark:text-slate-400">
+            Securely manage employees, departments and organization hierarchy.
+          </p> */}
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign in to access your dashboard</p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/10 p-6 shadow-2xl backdrop-blur-xl">
+        <div className="rounded-3xl bg-white p-8 shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
           {isRegister ? (
             <form
               onSubmit={onRegister}
               className="space-y-4"
             >
               <div>
-                <Label>Name</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input
-                  required
+                id="name"
                   value={name}
-                  onChange={
-                    e => setName(e.target.value)
-                  }
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setRegisterErrors((p) => ({
+                      ...p,
+                      name: "",
+                    }));
+                  }}
                   placeholder="Full name"
                 />
-              </div> <div>
-                <Label>Email</Label><Input
+              </div>
+              {registerErrors.name && (
+                <p className="mt-1 text-sm text-red-500">
+                  {registerErrors.name}
+                </p>
+              )}
+              <div>
+                <Label htmlFor="regEmail">Email</Label><Input
+                id="regEmail"
                   type="email"
-                  required
                   value={registerEmail}
-                  onChange={
-                    e => setRegisterEmail(e.target.value)
-                  }
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setRegisterErrors((p) => ({
+                      ...p,
+                      name: "",
+                    }));
+                  }}
                   placeholder="email@example.com"
                 />
-              </div><div>
-                <Label>Password</Label>
+              </div>
+              {registerErrors.email && (
+                <p className="mt-1 text-sm text-red-500">
+                  {registerErrors.email}
+                </p>
+              )}
+              <div>
+                <Label htmlFor="regPassword">Password</Label>
 
                 <Input
+                 id="regPassword"
                   type="password"
-                  required
                   value={registerPassword}
-                  onChange={
-                    e => setRegisterPassword(e.target.value)
-                  }
+                  onChange={(e) => {
+                    setRegisterPassword(e.target.value);
+                    setRegisterErrors((p) => ({
+                      ...p,
+                      password: "",
+                    }));
+                  }}
                   placeholder="Password"
                 />
-              </div> <div>
-                <Label>Confirm Password</Label>
+              </div>
+              {registerErrors.password && (
+                <p className="mt-1 text-sm text-red-500">
+                  {registerErrors.password}
+                </p>
+              )}
+              <div>
+                <Label htmlFor="conPassword">Confirm Password</Label>
                 <Input
+                id="conPassword"
                   type="password"
-                  required
                   value={confirmPassword}
-                  onChange={
-                    e => setConfirmPassword(e.target.value)
-                  }
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setRegisterErrors((p) => ({
+                      ...p,
+                      confirmPassword: "",
+                    }));
+                  }}
                   placeholder="Confirm password"
                 />
-              </div> <Button
+              </div>
+              {registerErrors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-500">
+                  {registerErrors.confirmPassword}
+                </p>
+              )}
+              <Button
+              id="cButton"
                 className="w-full"
                 disabled={loading}
               >
@@ -115,6 +273,7 @@ export default function Login() {
                 }
 
               </Button><button
+              id="lButton"
                 type="button"
                 onClick={() => {
                   setIsRegister(false);
@@ -129,30 +288,69 @@ export default function Login() {
           ) : (
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
-                <Label>Email Address</Label>
+                <Label htmlFor="email">Email Address</Label>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="pl-10" />
+                  <Input type="email" id="email" value={email} onChange={(e) => {
+                    setEmail(e.target.value);
+                    setLoginErrors((p) => ({
+                      ...p,
+                      email: "",
+                    }));
+                  }} placeholder="you@company.com" className="pl-10" />
                 </div>
+                {loginErrors.email && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {loginErrors.email}
+                  </p>
+                )}
               </div>
               <div>
-                <Label>Password</Label>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input type={show ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pl-10 pr-10" />
-                  <button type="button" aria-label="Show password" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <Input
+                    type={show ? "text" : "password"}
+                    id="password"
+                    placeholder='password'
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setLoginErrors((p) => ({
+                        ...p,
+                        password: "",
+                      }));
+                    }}
+                  />
+                  <button id="button" type="button" aria-label="Show password" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                     {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+
+                {loginErrors.password && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {loginErrors.password}
+                  </p>
+                )}
               </div>
-
-              {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">{error}</p>}
-
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? <Spinner className="h-4 w-4" /> : 'Sign In'}
+              <Button
+                type="submit"
+                id="sButton"
+                disabled={loading}
+                className="w-full h-11"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Spinner className="h-4 w-4" />
+                    <span>Signing In...</span>
+                  </div>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
               <button
                 type="button"
+                id="rButton"
                 onClick={() => setIsRegister(true)}
                 className="w-full text-sm text-sky-600 hover:underline"
               >
@@ -166,7 +364,7 @@ export default function Login() {
             <p className="mb-2 text-center text-xs font-medium uppercase tracking-wide text-slate-400">Demo Accounts</p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {demoAccounts.map((a) => (
-                <button key={a.label} onClick={() => fill(a)} className="rounded-lg border border-slate-200 px-2 py-2 text-xs font-medium text-slate-600 transition-colors hover:border-sky-400 hover:bg-sky-50 hover:text-sky-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-500 dark:hover:bg-sky-500/10">
+                <button  id="dButton" key={a.label} onClick={() => fill(a)} className="rounded-lg border border-slate-200 px-2 py-2 text-xs font-medium text-slate-600 transition-colors hover:border-sky-400 hover:bg-sky-50 hover:text-sky-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-500 dark:hover:bg-sky-500/10">
                   {a.label}
                 </button>
               ))}

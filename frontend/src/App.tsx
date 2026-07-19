@@ -11,6 +11,8 @@ import EmployeeDetail from './components/employee/EmployeeDetails';
 import OrganizationTree from './components/organization/OrganizationTree';
 import NotFound from './components/ui/NotFound';
 import Login from './components/auth/Login';
+import Reports from './components/employee/Reports';
+import Settings from './components/employee/Settings';
 
 
 
@@ -44,6 +46,9 @@ export default function App() {
         <Route path="employees/:id" element={<EmployeeDetail />} />
         <Route path="employees/:id/edit" element={<EmployeeForm />} />
         <Route path="organization" element={<OrganizationTree />} />
+        <Route path="/reports" element={<Reports />} />
+
+        <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

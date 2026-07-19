@@ -2,12 +2,20 @@ import { create } from "zustand";
 import api from "../services/api";
 import type { Employee, EmployeeFormData } from "../types";
 
-interface EmployeeResponse {
-  data: Employee[];
+export interface Pagination {
   total: number;
   page: number;
-  pages: number;
   limit: number;
+  pages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
+export interface EmployeeApiResponse {
+  success: boolean;
+  message: string;
+  data: Employee[];
+  pagination: Pagination;
 }
 
 interface EmployeeState {
@@ -66,250 +74,245 @@ interface EmployeeState {
 }
 
 export const useEmployeeStore =
-create<EmployeeState>((set) => ({
-  employees: [],
-  employee: null,
+  create<EmployeeState>((set) => ({
+    employees: [],
+    employee: null,
 
-  loading: false,
-  saving: false,
-  deleting: false,
+    loading: false,
+    saving: false,
+    deleting: false,
 
-  total: 0,
-  page: 1,
-  pages: 1,
-  limit: 10,
+    total: 0,
+    page: 1,
+    pages: 1,
+    limit: 10,
 
-  error: null,
+    error: null,
 
-  getEmployees: async (params = {}) => {
-    set({
-      loading: true,
-      error: null,
-    });
+    getEmployees: async (params = {}) => {
+      set({
+        loading: true,
+        error: null,
+      });
 
-    try {
-      const { data } =
-        await api.get<EmployeeResponse>(
-          "/employees",
-          {
-            params,
+      try {
+        const { data } =
+          await api.get<EmployeeApiResponse>("/employees", { params, });
+
+        set({
+          employees: data.data,
+          total: data.pagination.total,
+          page: data.pagination.page,
+          pages: data.pagination.pages,
+          limit: data.pagination.limit,
+          loading: false,
+        });
+      } catch (error: any) {
+        set({
+          loading: false,
+          error:
+            error.response?.data?.message ??
+            "Failed to load employees",
+        });
+      }
+    },
+
+    getEmployee: async (id) => {
+      set({
+        loading: true,
+        error: null,
+      });
+
+      try {
+        const { data } =
+          await api.get<Employee>(
+            `/employees/${id}`
+          );
+
+        set({
+          employee: data,
+          loading: false,
+        });
+      } catch (error: any) {
+        set({
+          loading: false,
+          error:
+            error.response?.data?.message ??
+            "Failed to load employee",
+        });
+      }
+    },
+
+    createEmployee: async (form) => {
+      set({
+        saving: true,
+        error: null,
+      });
+
+      try {
+        const body = new FormData();
+
+        Object.entries(form).forEach(
+          ([key, value]) => {
+            if (
+              value !== undefined &&
+              value !== null
+            ) {
+              body.append(
+                key,
+                value as any
+              );
+            }
           }
         );
 
-      set({
-        employees: data.data,
-        total: data.total,
-        page: data.page,
-        pages: data.pages,
-        limit: data.limit,
-        loading: false,
-      });
-    } catch (error: any) {
-      set({
-        loading: false,
-        error:
-          error.response?.data?.message ??
-          "Failed to load employees",
-      });
-    }
-  },
+        await api.post(
+          "/employees",
+          body,
+          {
+            headers: {
+              "Content-Type":
+                "multipart/form-data",
+            },
+          }
+        );
 
-  getEmployee: async (id) => {
-    set({
-      loading: true,
-      error: null,
-    });
+        set({
+          saving: false,
+        });
 
-    try {
-      const { data } =
-        await api.get<Employee>(
+        return true;
+      } catch (error: any) {
+        set({
+          saving: false,
+          error:
+            error.response?.data?.message ??
+            "Failed to create employee",
+        });
+
+        return false;
+      }
+    },
+
+    updateEmployee: async (
+      id,
+      form
+    ) => {
+      set({
+        saving: true,
+        error: null,
+      });
+
+      try {
+        const body = new FormData();
+
+        Object.entries(form).forEach(
+          ([key, value]) => {
+            if (
+              value !== undefined &&
+              value !== null
+            ) {
+              body.append(
+                key,
+                value as any
+              );
+            }
+          }
+        );
+
+        await api.put(
+          `/employees/${id}`,
+          body,
+          {
+            headers: {
+              "Content-Type":
+                "multipart/form-data",
+            },
+          }
+        );
+
+        set({
+          saving: false,
+        });
+
+        return true;
+      } catch (error: any) {
+        set({
+          saving: false,
+          error:
+            error.response?.data?.message ??
+            "Failed to update employee",
+        });
+
+        return false;
+      }
+    },
+
+    deleteEmployee: async (
+      id
+    ) => {
+      set({
+        deleting: true,
+        error: null,
+      });
+
+      try {
+        await api.delete(
           `/employees/${id}`
         );
 
-      set({
-        employee: data,
-        loading: false,
-      });
-    } catch (error: any) {
-      set({
-        loading: false,
-        error:
-          error.response?.data?.message ??
-          "Failed to load employee",
-      });
-    }
-  },
+        set({
+          deleting: false,
+        });
 
-  createEmployee: async (form) => {
-    set({
-      saving: true,
-      error: null,
-    });
+        return true;
+      } catch (error: any) {
+        set({
+          deleting: false,
+          error:
+            error.response?.data?.message ??
+            "Failed to delete employee",
+        });
 
-    try {
-      const body = new FormData();
+        return false;
+      }
+    },
 
-      Object.entries(form).forEach(
-        ([key, value]) => {
-          if (
-            value !== undefined &&
-            value !== null
-          ) {
-            body.append(
-              key,
-              value as any
-            );
+    setManager: async (
+      employeeId,
+      managerId
+    ) => {
+      try {
+        await api.patch(
+          `/employees/${employeeId}/manager`,
+          {
+            reportingManager:
+              managerId,
           }
-        }
-      );
+        );
 
-      await api.post(
-        "/employees",
-        body,
-        {
-          headers: {
-            "Content-Type":
-              "multipart/form-data",
-          },
-        }
-      );
+        return true;
+      } catch {
+        return false;
+      }
+    },
 
+    getReportees: async (id) => {
+      const { data } =
+        await api.get<Employee[]>(
+          `/employees/${id}/reportees`
+        );
+
+      return data;
+    },
+
+    clearEmployee: () =>
       set({
-        saving: false,
-      });
+        employee: null,
+      }),
 
-      return true;
-    } catch (error: any) {
+    clearError: () =>
       set({
-        saving: false,
-        error:
-          error.response?.data?.message ??
-          "Failed to create employee",
-      });
-
-      return false;
-    }
-  },
-
-  updateEmployee: async (
-    id,
-    form
-  ) => {
-    set({
-      saving: true,
-      error: null,
-    });
-
-    try {
-      const body = new FormData();
-
-      Object.entries(form).forEach(
-        ([key, value]) => {
-          if (
-            value !== undefined &&
-            value !== null
-          ) {
-            body.append(
-              key,
-              value as any
-            );
-          }
-        }
-      );
-
-      await api.put(
-        `/employees/${id}`,
-        body,
-        {
-          headers: {
-            "Content-Type":
-              "multipart/form-data",
-          },
-        }
-      );
-
-      set({
-        saving: false,
-      });
-
-      return true;
-    } catch (error: any) {
-      set({
-        saving: false,
-        error:
-          error.response?.data?.message ??
-          "Failed to update employee",
-      });
-
-      return false;
-    }
-  },
-
-  deleteEmployee: async (
-    id
-  ) => {
-    set({
-      deleting: true,
-      error: null,
-    });
-
-    try {
-      await api.delete(
-        `/employees/${id}`
-      );
-
-      set({
-        deleting: false,
-      });
-
-      return true;
-    } catch (error: any) {
-      set({
-        deleting: false,
-        error:
-          error.response?.data?.message ??
-          "Failed to delete employee",
-      });
-
-      return false;
-    }
-  },
-
-  setManager: async (
-    employeeId,
-    managerId
-  ) => {
-    try {
-      await api.patch(
-        `/employees/${employeeId}/manager`,
-        {
-          reportingManager:
-            managerId,
-        }
-      );
-
-      return true;
-    } catch {
-      return false;
-    }
-  },
-
-  getReportees: async (id) => {
-    const { data } =
-      await api.get<Employee[]>(
-        `/employees/${id}/reportees`
-      );
-
-    return data;
-  },
-
-  clearEmployee: () =>
-    set({
-      employee: null,
-    }),
-
-  clearError: () =>
-    set({
-      error: null,
-    }),
-}));
+        error: null,
+      }),
+  }));

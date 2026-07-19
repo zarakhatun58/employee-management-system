@@ -1,488 +1,299 @@
-# Employee Management System (EMS) - Backend
+# Employee Management System (EMS)
 
-A production-ready Employee Management System backend built with **Node.js**, **Express.js**, **TypeScript**, and **MongoDB**.
+A modern full-stack Employee Management System built with React, TypeScript, Node.js, Express, and MongoDB.
 
-The project includes secure JWT authentication, role-based access control, employee management, organization hierarchy, dashboard analytics, CSV import, file uploads, Docker support, and REST APIs.
-
----
-
-# Tech Stack
-
-- Node.js
-- Express.js
-- TypeScript
-- MongoDB Atlas
-- Mongoose
-- JWT Authentication
-- bcrypt
-- Multer
-- Express Validator
-- Docker
-- Render Deployment
+The application provides secure authentication, role-based access control, employee management, organization hierarchy, dashboard analytics, reporting, and administrative tools.
 
 ---
 
-# Features
+## Features
 
-## Authentication
+### Authentication
 
-- User Registration
-- Login
-- Logout
 - JWT Authentication
-- Password Hashing (bcrypt)
+- Refresh Token Authentication
+- Secure Password Hashing
 - Protected Routes
+- Role Based Authorization
+- Profile Management
 
 ---
 
-## Role Based Access Control
+### Dashboard
 
-### Super Admin
-
-- Full Access
-- Create Employee
-- Update Employee
-- Delete Employee
-- Assign Roles
-- Assign Reporting Managers
-
-### HR
-
-- Create Employee
-- Update Employee
-- View Employees
-- Cannot Delete Employees
-- Cannot Assign Super Admin
-
-### Employee
-
-- View Own Profile
-- Update Limited Profile Information
+- Employee Statistics
+- Active & Inactive Employees
+- Department Statistics
+- Monthly Joining Analytics
+- Employee Growth Charts
+- Recent Employees
+- Quick Actions
+- Profile Summary
 
 ---
 
-## Employee Management
+### Employee Management
 
 - Create Employee
 - Update Employee
 - Delete Employee (Soft Delete)
-- View Employee
-- List Employees
-- Search Employees
-- Filter Employees
+- Employee Details
+- Employee Search
+- Employee Filters
+- Employee Sorting
 - Pagination
-- Sorting
+- Employee Profile Image
 
 ---
 
-## Organization Hierarchy
+### Organization Management
 
-- Reporting Manager
-- Reportees
-- Organization Tree
-- Prevent Circular Reporting
-
----
-
-## Dashboard
-
-- Total Employees
-- Active Employees
-- Inactive Employees
-- Department Count
-- Department Distribution
-- Role Distribution
-- Monthly Joining Statistics
+- Reporting Manager Assignment
+- Organization Hierarchy
+- Direct Reportees
+- Circular Reporting Prevention
 
 ---
 
-## Bonus Features
+### Reports
 
-- CSV Import
-- Profile Image Upload
-- Docker Support
-- REST API
+- Employee Statistics
+- Department Summary
+- Active vs Inactive Employees
+- Workforce Overview
+- Printable Reports
+
+---
+
+### Settings
+
+- System Information
+- Application Version
+- Role Information
+- Theme Support
+- Account Information
+
+---
+
+### User Roles
+
+- Super Admin
+- HR Manager
+- Employee
+
+Permissions are automatically managed based on user role.
+
+---
+
+## Technology Stack
+
+### Frontend
+
+- React
 - TypeScript
-- MongoDB Atlas
+- Vite
+- Tailwind CSS
+- React Router
+- Zustand
+- Axios
+- Recharts
+- Lucide React
+## Frontend Unit Tests
+
+The frontend includes unit tests using **Jest** and **React Testing Library**.
+
+### Tested Components
+
+- ✅ Login
+  - Email validation
+  - Password validation
+  - Successful login submission
+
+- ✅ Employee Form
+  - Required field validation
+  - Invalid email validation
+  - Invalid phone validation
+  - Salary validation
+  - Form submission
+
+### Run Tests
+
+```bash
+cd frontend
+
+npm install
+
+npm test
+```
+
+Run tests with coverage:
+
+```bash
+npm run test:coverage
+```
+
+### Testing Stack
+
+- Jest
+- React Testing Library
+- @testing-library/jest-dom
+- jest-environment-jsdom
+---
+
+### Backend
+
+- Node.js
+- Express.js
+- TypeScript
+- MongoDB
+- Mongoose
+- JWT
+- bcrypt
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```
-src
+employee-management-system/
 │
-├── config
-├── controllers
-├── middleware
-├── models
-├── routes
-├── services
-├── utils
-├── validators
-├── types
-├── uploads
-└── server.ts
+├── backend/
+│
+├── frontend/
+│
+├── API.md
+│
+└── README.md
 ```
 
 ---
 
-# Installation
+## Getting Started
 
-Clone repository
+### Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/ems-backend.git
-
-cd ems-backend
+git clone <repository-url>
 ```
 
-Install dependencies
+---
+
+### Install Dependencies
+
+Backend
 
 ```bash
+cd backend
+npm install
+```
+
+Frontend
+
+```bash
+cd frontend
 npm install
 ```
 
 ---
 
-# Environment Variables
-
-Create a `.env` file.
-
-```env
-PORT=5000
-
-NODE_ENV=development
-
-MONGODB_URI=mongodb+srv://YOUR_DATABASE
-
-JWT_SECRET=your_jwt_secret
-
-JWT_REFRESH_SECRET=your_refresh_secret
-
-JWT_EXPIRES_IN=7d
-
-JWT_REFRESH_EXPIRES_IN=30d
-
-EMAIL_USER=your_email@gmail.com
-
-EMAIL_PASS=your_app_password
-
-UPLOAD_DIR=uploads
-```
-
----
-
-# Running Project
-
-Development
+### Run Backend
 
 ```bash
 npm run dev
 ```
 
-Production Build
+---
+
+### Run Frontend
 
 ```bash
-npm run build
-```
-
-Production
-
-```bash
-npm start
+npm run dev
 ```
 
 ---
 
-# Docker
+## Screens
 
-Build Image
+- Login
+- Dashboard
+- Employee List
+- Employee Details
+- Add Employee
+- Edit Employee
+- Organization Chart
+- Reports
+- Settings
+- Profile Modal
 
-```bash
-docker build -t ems-backend .
+---
+
+## Role Permissions
+
+| Feature | Super Admin | HR | Employee |
+|----------|------------|----|----------|
+| Dashboard | ✅ | ✅ | ✅ |
+| Employees | ✅ | ✅ | View |
+| Add Employee | ✅ | ✅ | ❌ |
+| Edit Employee | ✅ | ✅ | Own Profile |
+| Delete Employee | ✅ | ❌ | ❌ |
+| Reports | ✅ | ✅ | ❌ |
+| Settings | ✅ | ❌ | ❌ |
+| Organization | ✅ | ✅ | View |
+
+---
+
+## Security
+
+- JWT Authentication
+- Refresh Tokens
+- Password Hashing
+- Protected APIs
+- Role Based Authorization
+- Input Validation
+- Error Handling
+
+---
+
+## UI Features
+
+- Responsive Design
+- Dark Mode
+- Mobile Friendly
+- Reusable Components
+- Modern Dashboard
+- Charts & Analytics
+- Toast Notifications
+- Loading States
+- Empty States
+- Confirmation Modals
+
+---
+
+## Future Improvements
+
+- Email Notifications
+- Audit Logs
+- Attendance Management
+- Leave Management
+- Payroll Module
+- Export Reports (PDF/Excel)
+- Multi-language Support
+
+---
+
+## Documentation
+
+Complete API documentation is available in:
+
 ```
-
-Run
-
-```bash
-docker run -p 5000:5000 ems-backend
+API.md
 ```
 
 ---
 
-# API Base URL
+## License
 
-```
-http://localhost:5000/api
-```
-
----
-
-# Authentication APIs
-
-## Register
-
-POST
-
-```
-/api/auth/register
-```
-
-## Login
-
-POST
-
-```
-/api/auth/login
-```
-
-## Logout
-
-POST
-
-```
-/api/auth/logout
-```
-
-## Current User
-
-GET
-
-```
-/api/auth/me
-```
-
----
-
-# Employee APIs
-
-## Get Employees
-
-GET
-
-```
-/api/employees
-```
-
-Supports
-
-- Pagination
-- Search
-- Filters
-- Sorting
-
----
-
-## Get Employee
-
-GET
-
-```
-/api/employees/:id
-```
-
----
-
-## Create Employee
-
-POST
-
-```
-/api/employees
-```
-
-Multipart Form Data
-
-Fields
-
-- employeeId
-- name
-- email
-- phone
-- department
-- designation
-- salary
-- joiningDate
-- status
-- role
-- reportingManager
-- profileImage
-
----
-
-## Update Employee
-
-PUT
-
-```
-/api/employees/:id
-```
-
----
-
-## Delete Employee
-
-DELETE
-
-```
-/api/employees/:id
-```
-
-Soft Delete
-
----
-
-## Reportees
-
-GET
-
-```
-/api/employees/:id/reportees
-```
-
----
-
-## Assign Manager
-
-PATCH
-
-```
-/api/employees/:id/manager
-```
-
-Body
-
-```json
-{
-    "reportingManager":"employeeId"
-}
-```
-
----
-
-## CSV Import
-
-POST
-
-```
-/api/employees/import
-```
-
-Multipart
-
-```
-file
-```
-
----
-
-# Organization APIs
-
-Organization Tree
-
-GET
-
-```
-/api/organization/tree
-```
-
-Returns the complete reporting hierarchy.
-
----
-
-# Dashboard APIs
-
-Dashboard Statistics
-
-GET
-
-```
-/api/dashboard/stats
-```
-
-Returns
-
-- Total Employees
-- Active Employees
-- Inactive Employees
-- Department Count
-- Role Distribution
-- Monthly Joinings
-
----
-
-# Authentication
-
-Protected APIs require
-
-```
-Authorization
-
-Bearer <token>
-```
-
----
-
-# Roles
-
-| Role | Permission |
-|-------|------------|
-| Super Admin | Full Access |
-| HR | Create, Update, View |
-| Employee | View Own Profile |
-
----
-
-# Validation
-
-Backend validation includes
-
-- Email
-- Phone
-- Salary
-- Required Fields
-- Duplicate Email
-- Duplicate Employee ID
-- Duplicate Phone
-
----
-
-# Soft Delete
-
-Deleting an employee will
-
-- Set `deleted = true`
-- Set status to inactive
-- Remove reporting manager references
-
-No records are permanently deleted.
-
----
-
-# Deployment
-
-Backend deployed using
-
-- Render
-
-Database
-
-- MongoDB Atlas
-
----
-
-# Default Workflow
-
-1. Login
-2. Receive JWT
-3. Pass JWT in Authorization Header
-4. Access Protected APIs
-5. Manage Employees
-6. View Dashboard
-7. View Organization Tree
-
----
+This project is developed for learning, demonstration, and full-stack development purposes.
 
 # Author
 

@@ -4,7 +4,8 @@ import { useAuthStore } from '../../store/auth.store';
 import { Users, UserCheck, UserX, Building2, TrendingUp, PieChart as PieIcon, BarChart3, UserPlus, Network, Badge, RefreshCw, UserCircle, ShieldCheck, Activity } from 'lucide-react';
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
-  PieChart, Pie, Cell, Legend, AreaChart, Area,
+  PieChart, Pie, Cell, Legend, AreaChart, Area, LineChart,
+  Line,
 } from 'recharts';
 import type { DashboardStats, Employee } from '../../types';
 import { employeeService } from '../../services/employee.services';
@@ -17,155 +18,157 @@ import Avatar from '../ui/Avatar';
 const PIE_COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#6366f1', '#14b8a6'];
 
 export default function Dashboard() {
- const { user } = useAuthStore();
+  const { user } = useAuthStore();
 
-const [stats, setStats] = useState<DashboardStats | null>(null);
-const [employees, setEmployees] = useState<Employee[]>([]);
-const [loading, setLoading] = useState(true);
-const [refreshing, setRefreshing] = useState(false);
-    const navigate = useNavigate();
-const greeting = useMemo(() => {
-  const hour = new Date().getHours();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const navigate = useNavigate();
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
 
-  if (hour < 12) return "Good Morning";
-  if (hour < 17) return "Good Afternoon";
-  return "Good Evening";
-}, []);
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  }, []);
 
-const loadDashboard = async () => {
-  try {
-    setLoading(true);
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
 
-    const [dashboard, employeeList] = await Promise.all([
-      employeeService.dashboard(),
-      employeeService.getAll({
-        page: 1,
-        limit: 5,
-        sort: "joiningDate",
-        order: "desc"
-      })
-    ]);
+      const [dashboard, employeeResponse] = await Promise.all([
+        employeeService.dashboard(),
+        employeeService.getAll({
+          page: 1,
+          limit: 5,
+          sortBy: "joiningDate",
+          sortOrder: "desc",
+        }),
+      ]);
+      console.log("Dashboard API:", dashboard);
+      setStats(dashboard);
 
-    setStats(dashboard);
-
-    if (Array.isArray(employeeList)) {
-      setEmployees(employeeList);
-    } else if ("data" in employeeList) {
-      setEmployees(employeeList.data);
+      // backend always returns PaginatedEmployees
+      if (Array.isArray(employeeResponse)) {
+        setEmployees(employeeResponse);
+      } else {
+        setEmployees(employeeResponse.data ?? []);
+      }
+    } catch (err) {
+      console.error(err);
+      setEmployees([]);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLoading(false);
+  };
+
+  const refreshDashboard = async () => {
+    setRefreshing(true);
+    await loadDashboard();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[70vh] items-center justify-center">
+        <Spinner className="h-10 w-10 text-sky-600" />
+      </div>
+    );
   }
-};
 
-const refreshDashboard = async () => {
-  setRefreshing(true);
-  await loadDashboard();
-  setRefreshing(false);
-};
+  if (!stats) {
+    return (
+      <Card className="p-10 text-center">
+        <h2 className="text-xl font-semibold">
+          Dashboard unavailable
+        </h2>
 
-useEffect(() => {
-  loadDashboard();
-}, []);
+        <p className="mt-2 text-slate-500">
+          Unable to load dashboard statistics.
+        </p>
 
-if (loading) {
+        <Button
+          className="mt-6"
+          onClick={refreshDashboard}
+        >
+          Try Again
+        </Button>
+      </Card>
+    );
+  }
+
+  const cards = [
+    {
+      title: "Total Employees",
+      value: stats.totalEmployees,
+      icon: Users,
+      color:
+        "from-sky-500 via-sky-600 to-cyan-500",
+      bg:
+        "bg-gradient-to-br from-sky-500 to-cyan-600"
+    },
+    {
+      title: "Active Employees",
+      value: stats.activeEmployees,
+      icon: UserCheck,
+      color:
+        "from-emerald-500 via-emerald-600 to-teal-500",
+      bg:
+        "bg-gradient-to-br from-emerald-500 to-teal-600"
+    },
+    {
+      title: "Inactive Employees",
+      value: stats.inactiveEmployees,
+      icon: UserX,
+      color:
+        "from-rose-500 via-red-500 to-orange-500",
+      bg:
+        "bg-gradient-to-br from-rose-500 to-red-600"
+    },
+    {
+      title: "Departments",
+      value: stats.departmentCount,
+      icon: Building2,
+      color:
+        "from-amber-500 via-orange-500 to-yellow-500",
+      bg:
+        "bg-gradient-to-br from-amber-500 to-orange-600"
+    }
+  ];
+
+  const quickActions = [
+    {
+      title: "Add Employee",
+      icon: UserPlus,
+      path: "/employees/new"
+    },
+    {
+      title: "Employees",
+      icon: Users,
+      path: "/employees"
+    },
+    {
+      title: "Organization",
+      icon: Network,
+      path: "/organization"
+    },
+    {
+      title: "Reports",
+      icon: BarChart3,
+      path: "/dashboard"
+    }
+  ];
+
   return (
-    <div className="flex h-[70vh] items-center justify-center">
-      <Spinner className="h-10 w-10 text-sky-600" />
-    </div>
-  );
-}
-
-if (!stats) {
-  return (
-    <Card className="p-10 text-center">
-      <h2 className="text-xl font-semibold">
-        Dashboard unavailable
-      </h2>
-
-      <p className="mt-2 text-slate-500">
-        Unable to load dashboard statistics.
-      </p>
-
-      <Button
-        className="mt-6"
-        onClick={refreshDashboard}
-      >
-        Try Again
-      </Button>
-    </Card>
-  );
-}
-
-const cards = [
-  {
-    title: "Total Employees",
-    value: stats.totalEmployees,
-    icon: Users,
-    color:
-      "from-sky-500 via-sky-600 to-cyan-500",
-    bg:
-      "bg-gradient-to-br from-sky-500 to-cyan-600"
-  },
-  {
-    title: "Active Employees",
-    value: stats.activeEmployees,
-    icon: UserCheck,
-    color:
-      "from-emerald-500 via-emerald-600 to-teal-500",
-    bg:
-      "bg-gradient-to-br from-emerald-500 to-teal-600"
-  },
-  {
-    title: "Inactive Employees",
-    value: stats.inactiveEmployees,
-    icon: UserX,
-    color:
-      "from-rose-500 via-red-500 to-orange-500",
-    bg:
-      "bg-gradient-to-br from-rose-500 to-red-600"
-  },
-  {
-    title: "Departments",
-    value: stats.departmentCount,
-    icon: Building2,
-    color:
-      "from-amber-500 via-orange-500 to-yellow-500",
-    bg:
-      "bg-gradient-to-br from-amber-500 to-orange-600"
-  }
-];
-
-const quickActions = [
-  {
-    title: "Add Employee",
-    icon: UserPlus,
-    path: "/employees/new"
-  },
-  {
-    title: "Employees",
-    icon: Users,
-    path: "/employees"
-  },
-  {
-    title: "Organization",
-    icon: Network,
-    path: "/organization"
-  },
-  {
-    title: "Reports",
-    icon: BarChart3,
-    path: "/dashboard"
-  }
-];
-
-return (
-  <div className="space-y-6">
-            <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-sky-700 via-cyan-600 to-indigo-700 p-8 text-white shadow-2xl">
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-sky-700 via-cyan-600 to-indigo-700 p-8 text-white shadow-2xl">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl ">
             <p className="text-lg font-medium text-sky-100">
               {greeting},
             </p>
@@ -251,7 +254,7 @@ return (
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map((card) => {
+        {cards?.map((card) => {
           const Icon = card.icon;
 
           return (
@@ -291,7 +294,7 @@ return (
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {quickActions.map((item) => {
+        {quickActions?.map((item) => {
           const Icon = item.icon;
 
           return (
@@ -315,7 +318,7 @@ return (
           );
         })}
       </section>
-            <section className="grid gap-6 xl:grid-cols-3">
+      <section className="grid gap-6 xl:grid-cols-3">
         <Card className="xl:col-span-2 p-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -330,42 +333,39 @@ return (
 
             <TrendingUp className="h-6 w-6 text-sky-600" />
           </div>
+<ResponsiveContainer width="100%" height={320}>
+  <LineChart data={stats.monthlyJoinings}>
 
-          <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={stats.monthlyJoinings}>
-              <defs>
-                <linearGradient id="growthFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0284c7" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#0284c7" stopOpacity={0} />
-                </linearGradient>
-              </defs>
+    <CartesianGrid
+      strokeDasharray="4 4"
+      stroke="#e2e8f0"
+    />
 
-              <CartesianGrid
-                strokeDasharray="4 4"
-                stroke="#e2e8f0"
-              />
+    <XAxis
+      dataKey="month"
+    />
 
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 12 }}
-              />
+    <YAxis
+      allowDecimals={false}
+    />
 
-              <YAxis
-                allowDecimals={false}
-                tick={{ fontSize: 12 }}
-              />
+    <Tooltip />
 
-              <Tooltip />
+    <Line
+      type="monotone"
+      dataKey="count"
+      stroke="#0284c7"
+      strokeWidth={3}
+      dot={{
+        r: 5,
+      }}
+      activeDot={{
+        r: 8,
+      }}
+    />
 
-              <Area
-                type="monotone"
-                dataKey="count"
-                stroke="#0284c7"
-                strokeWidth={3}
-                fill="url(#growthFill)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+  </LineChart>
+</ResponsiveContainer>
         </Card>
 
         <Card className="p-6">
@@ -393,7 +393,7 @@ return (
                 innerRadius={55}
                 paddingAngle={4}
               >
-                {stats.roleDistribution.map((_, index) => (
+                {stats.roleDistribution?.map((_, index) => (
                   <Cell
                     key={index}
                     fill={PIE_COLORS[index % PIE_COLORS.length]}
@@ -507,7 +507,7 @@ return (
                   {Math.round(
                     (stats.activeEmployees /
                       stats.totalEmployees) *
-                      100
+                    100
                   )}
                   %
                 </span>
@@ -517,11 +517,10 @@ return (
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-500"
                   style={{
-                    width: `${
-                      (stats.activeEmployees /
+                    width: `${(stats.activeEmployees /
                         stats.totalEmployees) *
                       100
-                    }%`
+                      }%`
                   }}
                 />
               </div>
@@ -529,7 +528,7 @@ return (
           </div>
         </Card>
       </section>
-            <section className="grid gap-6 xl:grid-cols-3">
+      <section className="grid gap-6 xl:grid-cols-3">
         <Card className="xl:col-span-2 overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-200 p-6 dark:border-slate-800">
             <div>
@@ -581,9 +580,9 @@ return (
               </thead>
 
               <tbody>
-                {employees.map((employee) => (
+                {employees?.map((employee) => (
                   <tr
-                    key={employee._id ?? employee.id}
+                    key={employee.id ?? employee.id}
                     className="border-b border-slate-100 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
                   >
                     <td className="px-6 py-4">
@@ -641,8 +640,7 @@ return (
                           variant="outline"
                           onClick={() =>
                             navigate(
-                              `/employees/${
-                                employee._id ?? employee.id
+                              `/employees/${employee.id ?? employee.id
                               }`
                             )
                           }
@@ -654,8 +652,7 @@ return (
                           size="sm"
                           onClick={() =>
                             navigate(
-                              `/employees/${
-                                employee._id ?? employee.id
+                              `/employees/${employee.id ?? employee.id
                               }/edit`
                             )
                           }
@@ -681,7 +678,7 @@ return (
             </table>
           </div>
         </Card>
-                <Card className="p-6">
+        <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -821,8 +818,8 @@ return (
             <h2 className="text-4xl font-bold text-slate-900 dark:text-white">
               {Math.round(
                 (stats.activeEmployees /
-                  Math.max(stats.totalEmployees,1)) *
-                  100
+                  Math.max(stats.totalEmployees, 1)) *
+                100
               )}
               %
             </h2>
@@ -832,11 +829,10 @@ return (
               <div
                 className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400"
                 style={{
-                  width: `${
-                    (stats.activeEmployees /
-                      Math.max(stats.totalEmployees,1)) *
+                  width: `${(stats.activeEmployees /
+                      Math.max(stats.totalEmployees, 1)) *
                     100
-                  }%`
+                    }%`
                 }}
               />
             </div>
@@ -901,7 +897,7 @@ return (
         </Card>
 
       </section>
-            <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-6 lg:grid-cols-2">
 
         <Card className="p-6">
           <div className="flex items-center justify-between">
@@ -920,7 +916,7 @@ return (
 
 
           <div className="mt-6 flex flex-wrap gap-3">
-            {stats.departments.map((department) => (
+            {stats.departments?.map((department) => (
               <div
                 key={department.department}
                 className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900"

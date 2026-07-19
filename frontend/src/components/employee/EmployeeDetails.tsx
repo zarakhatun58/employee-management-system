@@ -26,11 +26,13 @@ const navigate = useNavigate();
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    employeeService.get(id)
-      .then((e) => {
-        setEmp(e);
-        setSelectedManager(e.reportingManager ?? '');
-      })
+   employeeService.get(id)
+  .then((e) => {
+    console.log("EMPLOYEE DETAILS:", e);
+
+    setEmp(e);
+    setSelectedManager(e.reportingManager ?? "");
+  })
       .finally(() => setLoading(false));
     employeeService.reportees(id).then(setReportees).catch(() => { });
     employeeService.list({ limit: 1000 }).then((r) => setManagers(r.data)).catch(() => { });
@@ -57,13 +59,13 @@ const navigate = useNavigate();
       await employeeService.setManager(id!, selectedManager);
       toast('success', 'Reporting manager updated');
       setManagerModal(false);
-      setEmp((e) => e ? { ...e, reportingManager: selectedManager || null, reportingManagerName: managers.find((m) => m._id === selectedManager)?.name ?? null } : e);
+      setEmp((e) => e ? { ...e, reportingManager: selectedManager || null, reportingManagerName: managers.find((m) => m.id === selectedManager)?.name ?? null } : e);
     } catch (err: any) {
       toast('error', err.response?.data?.message ?? 'Failed to update manager');
     }
   };
 
-  const availableManagers = managers.filter((m) => m._id !== id && m.status === 'active');
+  const availableManagers = managers.filter((m) => m.id !== id && m.status === 'active');
 
   const info = [
     { icon: Mail, label: 'Email', value: emp.email },
@@ -153,15 +155,15 @@ const navigate = useNavigate();
             </div>
             <div>
               <p className="mb-2 text-xs text-slate-400">Direct Reportees ({reportees.length})</p>
-              {reportees.length === 0 ? (
+            {!Array.isArray(reportees) || reportees.length === 0 ? (
                 <p className="text-sm text-slate-400">No direct reports</p>
               ) : (
                 <div className="space-y-2">
-                  {reportees.map((r) => (
-                    r._id && (
+                  {(Array.isArray(reportees) ? reportees : []).map((r) => (
+                    r.id && (
                       <Link
-                        key={r._id}
-                        to={`/employees/${r._id}`}
+                        key={r.id}
+                        to={`/employees/${r.id}`}
                         className="flex items-center gap-3 rounded-lg border border-slate-200 p-2.5 transition-colors hover:border-sky-400 hover:bg-sky-50 dark:border-slate-800 dark:hover:bg-sky-500/10"
                       >
                         <Avatar name={r.name} src={r.profileImage} size={32} />
@@ -188,7 +190,7 @@ const navigate = useNavigate();
         <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">Select a new reporting manager. Circular reporting is automatically prevented.</p>
         <Select value={selectedManager} onChange={(e) => setSelectedManager(e.target.value)} className="mb-4">
           <option value="">None (top-level)</option>
-          {availableManagers.map((m) => <option key={m._id} value={m._id}>{m.name} — {m.designation}</option>)}
+          {availableManagers.map((m) => <option key={m.id} value={m.id}>{m.name} — {m.designation}</option>)}
         </Select>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => setManagerModal(false)}>Cancel</Button>

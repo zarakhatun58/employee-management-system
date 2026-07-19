@@ -18,6 +18,8 @@ import {
   Briefcase,
   Menu,
   X,
+  FileBarChart2,
+  Settings,
 } from "lucide-react";
 
 import {
@@ -34,6 +36,7 @@ import Avatar from "../../components/ui/Avatar";
 import Footer from "../layout/Footer";
 import { useAuthStore } from '../../store/auth.store';
 import { useUIStore } from '../../store/ui.store';
+import ProfileModal from '../auth/ProfileModal';
 
 
 const navItems = [
@@ -52,6 +55,23 @@ const navItems = [
     label: "Organization",
     icon: Network,
   },
+  {
+    label: "Reports",
+    to: "/reports",
+    icon: FileBarChart2,
+    roles: [
+      "super_admin",
+      "hr",
+    ],
+  },
+  {
+     label: "Settings",
+   to: "/settings",
+    icon: Settings,
+    roles: [
+      "super_admin",
+    ],
+  },
 ];
 
 export default function DashboardLayout() {
@@ -60,34 +80,37 @@ export default function DashboardLayout() {
     user,
     logout,
   } = useAuthStore();
-  const {
-    dark,
-    toggleDark,
-  } = useUIStore();
+  const dark = useUIStore((state) => state.dark);
+  const toggleDark = useUIStore((state) => state.toggleDark);
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [
-    sidebarOpen,
-    setSidebarOpen,
-  ] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     setSidebarOpen(false);
-  },[location.pathname]);
+  }, [location.pathname]);
+  useEffect(() => {
+    console.log("Theme:", dark);
 
-  useEffect(()=>{
+    if (dark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [dark]);
+  useEffect(() => {
     document.body.style.overflow =
       sidebarOpen
-      ? "hidden"
-      : "";
-    return ()=>{
-      document.body.style.overflow="";
+        ? "hidden"
+        : "";
+    return () => {
+      document.body.style.overflow = "";
 
     };
-  },[sidebarOpen]);
+  }, [sidebarOpen]);
 
-  const handleLogout = async()=>{
+  const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
@@ -126,14 +149,14 @@ export default function DashboardLayout() {
             `,
 
             sidebarOpen
-            ?
-            "translate-x-0"
-            :
-            "-translate-x-full"
+              ?
+              "translate-x-0"
+              :
+              "-translate-x-full"
           )}
 
         ><div
-            className="
+          className="
             flex
             h-16
             items-center
@@ -143,7 +166,7 @@ export default function DashboardLayout() {
             px-6
             dark:border-slate-800
             "
-          >
+        >
 
 
             <div
@@ -186,7 +209,7 @@ export default function DashboardLayout() {
               </span>
             </div>
             <button
-              onClick={()=>setSidebarOpen(false)}
+              onClick={() => setSidebarOpen(false)}
               className="
               rounded-lg
               p-2
@@ -213,13 +236,13 @@ export default function DashboardLayout() {
             "
           >
             {
-              navItems.map((item)=>{
-                const Icon=item.icon;
+              navItems.map((item) => {
+                const Icon = item.icon;
                 return (
                   <NavLink
                     key={item.to}
                     to={item.to}
-                    className={({isActive})=>
+                    className={({ isActive }) =>
                       cn(
                         `
                         flex
@@ -233,15 +256,15 @@ export default function DashboardLayout() {
                         transition
                         `,
                         isActive
-                        ?
-                        `
+                          ?
+                          `
                         bg-sky-50
                         text-sky-700
                         dark:bg-sky-500/10
                         dark:text-sky-400
                         `
-                        :
-                        `
+                          :
+                          `
                         text-slate-600
                         hover:bg-slate-100
                         dark:text-slate-400
@@ -262,62 +285,59 @@ export default function DashboardLayout() {
               })
             }
           </nav>
-          <div
-            className="
-            border-t
-            border-slate-200
-            p-4
-            dark:border-slate-800
-            "
-          >
-            <div
-              className="
-              flex
-              items-center
-              gap-3
-              "
-            >
+          <div className="border-t border-slate-200 p-4 dark:border-slate-800">
+            <div className="flex items-center gap-3">
               <Avatar
                 name={user?.name}
                 size={40}
               />
-              <div
-                className="
-                min-w-0
-                "
-              >
-                <p
-                  className="
-                  truncate
-                  text-sm
-                  font-semibold
-                  text-slate-800
-                  dark:text-white
-                  "
-                >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-slate-800 dark:text-white">
                   {user?.name}
                 </p>
+
                 <span
                   className={cn(
-                    `
-                    rounded-full
-                    px-2
-                    py-0.5
-                    text-xs
-                    `,
+                    "mt-1 inline-flex rounded-full px-2 py-0.5 text-xs",
                     roleColor(user?.role ?? "")
                   )}
                 >
                   {roleLabel(user?.role ?? "")}
                 </span>
+
               </div>
+
             </div>
+
+            <button
+              onClick={() => {
+                console.log("Profile Click");
+                setProfileOpen(true);
+              }}
+              className="
+      mt-4
+      w-full
+      rounded-xl
+      bg-sky-600
+      px-4
+      py-2
+      text-sm
+      font-medium
+      text-white
+      transition
+      hover:bg-sky-700
+      cursor-pointer
+    "
+            >
+              My Profile
+            </button>
+
           </div>
         </aside>
         {
           sidebarOpen && (
             <div
-              onClick={()=>setSidebarOpen(false)}
+              onClick={() => setSidebarOpen(false)}
               className="
               fixed
               inset-0
@@ -337,7 +357,7 @@ export default function DashboardLayout() {
           flex-col
           "
         ><header
-            className="
+          className="
             flex
             h-16
             items-center
@@ -349,9 +369,9 @@ export default function DashboardLayout() {
             dark:border-slate-800
             dark:bg-slate-900
             "
-          >
+        >
             <button
-              onClick={()=>setSidebarOpen(true)}
+              onClick={() => setSidebarOpen(true)}
               className="
               rounded-lg
               p-2
@@ -391,9 +411,13 @@ export default function DashboardLayout() {
               "
             >
               <button
-                onClick={toggleDark}
+                onClick={() => {
+                  console.log("clicked");
+                  toggleDark();
+                }}
                 className="
                 rounded-lg
+                border
                 p-2
                 hover:bg-slate-100
                 dark:hover:bg-slate-800
@@ -402,10 +426,10 @@ export default function DashboardLayout() {
 
                 {
                   dark
-                  ?
-                  <Sun className="h-5 w-5"/>
-                  :
-                  <Moon className="h-5 w-5"/>
+                    ?
+                    <Sun className="h-5 w-5 text-yellow-600" />
+                    :
+                    <Moon className="h-5 w-5 text-blue-800" />
                 }
               </button>
               <button
@@ -423,7 +447,7 @@ export default function DashboardLayout() {
                 dark:hover:bg-rose-500/10
                 "
               >
-                <LogOut className="h-4 w-4"/>
+                <LogOut className="h-4 w-4" />
                 <span className="hidden sm:block">
                   Logout
                 </span>
@@ -438,11 +462,15 @@ export default function DashboardLayout() {
             lg:p-6
             "
           >
-            <Outlet/>
+            <Outlet />
           </main>
-          <Footer/>
+          <Footer />
         </div>
       </div>
+      <ProfileModal
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+      />
     </ToastProvider>
 
   );

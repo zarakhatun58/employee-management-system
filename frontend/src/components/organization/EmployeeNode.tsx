@@ -47,7 +47,7 @@ function EmployeeNode({ data }: { data: EmployeeNodeData }) {
                             <h3 className="font-semibold text-slate-800 dark:text-white">
                                 {data.name}
                             </h3>
-                            {(data.role === "ADMIN" ||
+                            {(data.role === "super_admin" ||
                                 data.role === "CEO") && (
                                     <Crown
                                         size={16}
@@ -68,19 +68,9 @@ function EmployeeNode({ data }: { data: EmployeeNodeData }) {
                         </div>
                     </div>
                 </div>
+                <div className="mt-4 space-y-3">
 
-                <div className="mt-4 flex items-center justify-between">
-
-                    <span
-                        className={cn(
-                            "rounded-full px-3 py-1 text-xs font-semibold",
-                            roleColor(data.role)
-                        )}
-                    >
-                        {roleLabel(data.role)}
-                    </span>
-
-                    <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center justify-between">
                         <span
                             className={cn(
                                 "rounded-full px-3 py-1 text-xs font-semibold",
@@ -90,8 +80,8 @@ function EmployeeNode({ data }: { data: EmployeeNodeData }) {
                             {roleLabel(data.role)}
                         </span>
 
-                        <span className="text-xs text-slate-500">
-                            {data.reports} Reports
+                        <span className="text-xs text-blue-700">
+                            {data.reports ?? 0} Reports
                         </span>
                     </div>
 
@@ -101,7 +91,7 @@ function EmployeeNode({ data }: { data: EmployeeNodeData }) {
                                 e.stopPropagation();
                                 data.onToggle?.();
                             }}
-                            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 py-2 text-sm hover:bg-slate-200 dark:bg-slate-800"
+                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-100 py-2 text-sm hover:bg-slate-200 dark:bg-slate-800"
                         >
                             {data.expanded ? (
                                 <>
@@ -116,9 +106,7 @@ function EmployeeNode({ data }: { data: EmployeeNodeData }) {
                             )}
                         </button>
                     )}
-                </div>
-
-            </div>
+                </div> </div>
             <Handle type="source" position={Position.Bottom} />
         </>
     );

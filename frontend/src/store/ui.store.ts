@@ -19,23 +19,41 @@ interface UIState {
   setPageLoading: (loading: boolean) => void;
 }
 
+const applyTheme = (dark: boolean) => {
+  if (typeof document === "undefined") return;
+
+  if (dark) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+};
+
 export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
-      dark: true,
+      dark: false,
       sidebarOpen: false,
       sidebarCollapsed: false,
       pageLoading: false,
 
       toggleDark: () =>
-        set((state) => ({
-          dark: !state.dark,
-        })),
+        set((state) => {
+          const next = !state.dark;
+          applyTheme(next);
 
-      setDark: (value) =>
+          return {
+            dark: next,
+          };
+        }),
+
+      setDark: (value) => {
+        applyTheme(value);
+
         set({
           dark: value,
-        }),
+        });
+      },
 
       toggleSidebar: () =>
         set((state) => ({
@@ -64,10 +82,17 @@ export const useUIStore = create<UIState>()(
     }),
     {
       name: "ems-ui",
+
       partialize: (state) => ({
         dark: state.dark,
         sidebarCollapsed: state.sidebarCollapsed,
       }),
+
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          applyTheme(state.dark);
+        }
+      },
     }
   )
 );

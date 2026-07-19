@@ -359,4 +359,25 @@ async logout(p0: string) {
       message: "Password reset successfully",
     };
   },
+  async updateProfile(
+  userId: string,
+  data: {
+    name: string;
+    email: string;
+  }
+) {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    data,
+    {
+      new: true,
+    }
+  ).select("-password");
+
+  return {
+    success: true,
+    user,
+    message: "Profile updated successfully",
+  };
+}
 }

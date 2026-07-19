@@ -29,18 +29,23 @@ export default function EmployeeList() {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    employeeService.list(query)
-      .then((res) => {
-        setEmployees(res.data);
-        setTotal(res.total);
-        setPages(res.pages);
-        setPage(res.page);
-      })
-      .catch(() => toast('error', 'Failed to load employees'))
-      .finally(() => setLoading(false));
-  }, [query]);
+useEffect(() => {
+  setLoading(true);
+
+  employeeService
+    .list(query)
+    .then((res) => {
+      setEmployees(res.data);
+
+      setTotal(res.pagination.total);
+      setPages(res.pagination.pages);
+      setPage(res.pagination.page);
+    })
+    .catch(() =>
+      toast("error", "Failed to load employees")
+    )
+    .finally(() => setLoading(false));
+}, [query]);
 
   const updateQuery = (patch: Partial<EmployeeQuery>) => setQuery((q) => ({ ...q, ...patch, page: 1 }));
 
@@ -185,9 +190,9 @@ export default function EmployeeList() {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {employees.map((emp, i) => (
-                  <tr key={emp._id} className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50" style={{ animationDelay: `${i * 30}ms` }}>
+                  <tr key={emp.id} className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50" style={{ animationDelay: `${i * 30}ms` }}>
                     <td className="px-4 py-3">
-                      <Link to={`/employees/${emp._id}`} className="flex items-center gap-3">
+                      <Link to={`/employees/${emp.id}`} className="flex items-center gap-3">
                         <Avatar name={emp.name} src={emp.profileImage} size={36} />
                         <div>
                           <p className="font-medium text-slate-700 group-hover:text-sky-600 dark:text-slate-200">{emp.name}</p>
@@ -202,11 +207,11 @@ export default function EmployeeList() {
                     <td className="px-4 py-3"><Badge className={statusColor(emp.status)}>{emp.status}</Badge></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <Link to={`/employees/${emp._id}`}>
+                        <Link to={`/employees/${emp.id}`}>
                           <Button variant="ghost" size="sm" className="px-2"><Eye className="h-4 w-4" /></Button>
                         </Link>
                         {canDelete && (
-                          <Button variant="ghost" size="sm" className="px-2 text-rose-500 hover:bg-rose-50"  onClick={() => emp._id && setConfirmId(emp._id)}>
+                          <Button variant="ghost" size="sm" className="px-2 text-rose-500 hover:bg-rose-50"  onClick={() => emp.id && setConfirmId(emp.id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
@@ -222,7 +227,7 @@ export default function EmployeeList() {
       <div className="space-y-3 p-3 md:hidden">
         {
           employees.map((emp) => (
-            <Card key={emp._id} className="p-4">
+            <Card key={emp.id} className="p-4">
               <div className="flex items-center gap-3">
                 <Avatar name={emp.name} src={emp.profileImage} size={42} />
                 <div>
@@ -259,7 +264,7 @@ export default function EmployeeList() {
               </div>
 
               <div className="mt-4 flex justify-end">
-                <Link to={`/employees/${emp._id}`}>
+                <Link to={`/employees/${emp.id}`}>
                   <Button size="sm">
                     <Eye className="h-4 w-4" />
                     View

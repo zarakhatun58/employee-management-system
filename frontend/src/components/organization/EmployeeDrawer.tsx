@@ -43,15 +43,15 @@ export default function EmployeeDrawer({
                         : "translate-x-full"
                 )}
             >
-                <div className="flex items-center justify-between border-b p-5">
+                <div className="flex items-center justify-between border-b p-4">
 
-                    <h2 className="text-xl font-bold">
+                    <h2 className="text-xl font-bold text-slate-600 dark:text-slate-400">
                         Employee Details
                     </h2>
 
                     <button
                         onClick={onClose}
-                        className="rounded-lg p-2 hover:bg-slate-100"
+                        className="rounded-lg p-2 hover:bg-slate-100 text-slate-600 dark:text-slate-400"
                     >
                         <X />
                     </button>
@@ -70,11 +70,11 @@ export default function EmployeeDrawer({
 
                         <div>
 
-                            <h2 className="text-xl font-bold">
+                            <h2 className="text-xl font-bold text-slate-600 dark:text-slate-400">
                                 {employee.name}
                             </h2>
 
-                            <p className="text-slate-500">
+                            <p className="text-slate-500 ">
                                 {employee.designation}
                             </p>
 
@@ -89,45 +89,41 @@ export default function EmployeeDrawer({
                         </div>
                     </div>
                     <div className="space-y-4">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
                             <Mail size={18} />
                             <span>{employee.email || "Not Available"}</span>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
                             <Phone size={18} />
                             <span>{employee.phone || "Not Available"}</span>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
                             <Building2 size={18} />
                             <span>{employee.department}</span>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
                             <Briefcase size={18} />
                             <span>{employee.designation}</span>
                         </div>
                     </div>
                     <div>
-                        <h3 className="mb-3 font-semibold">
+                        <h3 className="mb-3 font-semibold text-slate-600 dark:text-slate-400">
                             Direct Reports
                         </h3>
 
-                        {employee.children.length === 0 ? (
+                        {(employee.children ?? []).length === 0 ? (
 
                             <p className="text-sm text-slate-500">
                                 No Direct Reports
                             </p>
 
                         ) : (
-
                             <div className="space-y-2">
-
                                 {employee.children.map(child => (
-
                                     <div
                                         key={child._id}
                                         className="flex items-center gap-3 rounded-lg border p-3"
                                     >
-
                                         <Avatar
                                             name={child.name}
                                             src={child.profileImage}
@@ -136,7 +132,7 @@ export default function EmployeeDrawer({
 
                                         <div>
 
-                                            <p className="font-medium">
+                                            <p className="font-medium text-slate-600 dark:text-slate-400">
                                                 {child.name}
                                             </p>
 

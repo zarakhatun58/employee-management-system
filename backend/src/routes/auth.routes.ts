@@ -71,4 +71,10 @@ router.post(
   authController.changePassword
 );
 
+router.put(
+  "/profile",
+  authMiddleware,
+  authController.updateProfile
+);
+
 export default router;

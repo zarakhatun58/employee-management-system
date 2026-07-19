@@ -46,27 +46,24 @@ export function statusColor(status: string): string {
     : 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-400';
 }
 
-export function departmentColor(department: string) {
-    switch (department.toLowerCase()) {
-        case "engineering":
-            return "bg-blue-100 text-blue-700";
+export function departmentColor(department?: string) {
+  const value = (department ?? "").toLowerCase();
 
-        case "hr":
-            return "bg-pink-100 text-pink-700";
+  switch (value) {
+    case "technology":
+    case "it":
+      return "bg-sky-100 text-sky-700";
 
-        case "finance":
-            return "bg-green-100 text-green-700";
+    case "sales":
+      return "bg-green-100 text-green-700";
 
-        case "sales":
-            return "bg-orange-100 text-orange-700";
+    case "design":
+      return "bg-pink-100 text-pink-700";
 
-        case "marketing":
-            return "bg-purple-100 text-purple-700";
+    case "hr":
+      return "bg-purple-100 text-purple-700";
 
-        case "support":
-            return "bg-cyan-100 text-cyan-700";
-
-        default:
-            return "bg-slate-100 text-slate-700";
-    }
+    default:
+      return "bg-slate-100 text-slate-700";
+  }
 }

@@ -13,6 +13,7 @@ function TreeRow({ node, depth }: { node: TreeNode; depth: number }) {
   const [expanded, setExpanded] = useState(depth < 1);
   const hasChildren = node.children.length > 0;
 
+
   return (
     <div className="animate-slide-down">
       <div
@@ -46,13 +47,20 @@ function TreeRow({ node, depth }: { node: TreeNode; depth: number }) {
 }
 
 export default function OrganizationTree() {
+  const [search,setSearch]=useState("");
+const [department,setDepartment]=useState("");
+const [role,setRole]=useState("");
+const [status,setStatus]=useState("");
+const [sort,setSort]=useState("name");
   const [forest, setForest] = useState<TreeNode[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    employeeService
-      .forest()
-      .then(setForest)
-      .catch(() => setForest([]))
+    employeeService.forest()
+      .then((data) => {
+        console.log("Forest: all emp", data);
+        setForest(data);
+      })
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
   if (loading) {
@@ -65,21 +73,21 @@ export default function OrganizationTree() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Organization Hierarchy</h1>
+        <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Organization Hierarchy</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">Reporting structure across the organization</p>
       </div>
 
       <Card className="overflow-hidden p-0 h-[760px]">
-  {forest.length > 0 ? (
-    <OrganizationChart forest={forest} />
-  ) : (
-    <EmptyState
-      icon={<Network className="h-8 w-8" />}
-      title="No organization data"
-      description="Add employees with reporting managers."
-    />
-  )}
-</Card>
+        {forest.length > 0 ? (
+          <OrganizationChart forest={forest} />
+        ) : (
+          <EmptyState
+            icon={<Network className="h-8 w-8" />}
+            title="No organization data"
+            description="Add employees with reporting managers."
+          />
+        )}
+      </Card>
     </div>
   );
 }

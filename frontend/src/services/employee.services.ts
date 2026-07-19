@@ -1,6 +1,7 @@
 import api from '../services/api';
-import type { Employee, PaginatedEmployees, DashboardStats, TreeNode } from '../types';
+import type { Employee,  DashboardStats, TreeNode, OrganizationResponse } from '../types';
 import { demoEmployees, demoDashboard, demoForest, filterEmployees, paginate } from '../services/mock-data';
+import { EmployeeApiResponse } from '../store/employee.store';
 
 export interface EmployeeQuery {
   page?: number;
@@ -17,96 +18,113 @@ export interface EmployeeQuery {
 let demoStore: Employee[] = [...demoEmployees];
 
 export const employeeService = {
-  list: async (q: EmployeeQuery): Promise<PaginatedEmployees> => {
-    try {
-      const { data } = await api.get('/employees', { params: q });
-      return data;
-    } catch {
-      const filtered = filterEmployees(demoStore, q);
-      const page = q.page || 1;
-      const limit = q.limit || 10;
-      const result = paginate(filtered, page, limit);
-      return { ...result, page, limit };
-    }
-  },
+
+list: async (
+  q: EmployeeQuery
+): Promise<EmployeeApiResponse> => {
+  try {
+    const { data } =
+      await api.get<EmployeeApiResponse>(
+        "/employees",
+        {
+          params: q,
+        }
+      );
+
+    return data;
+  } catch {
+    const filtered = filterEmployees(
+      demoStore,
+      q
+    );
+
+    const page = q.page ?? 1;
+    const limit = q.limit ?? 10;
+
+    const result = paginate(
+      filtered,
+      page,
+      limit
+    );
+
+    return {
+      success: true,
+      message: "Success",
+      data: result.data,
+      pagination: {
+        total: result.total,
+        page,
+        limit,
+        pages: result.pages,
+        hasNext: page < result.pages,
+        hasPrevious: page > 1,
+      },
+    };
+  }
+},
 
   get: async (id: string): Promise<Employee> => {
     try {
       const { data } = await api.get(`/employees/${id}`);
-      return data;
+      return data.data;
     } catch {
-      const emp = demoStore.find((e) => e._id === id);
+      const emp = demoStore.find((e) => e.id === id);
       if (!emp) throw new Error('Employee not found');
       return emp;
     }
   },
-  getAll: async (params?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  department?: string;
-  role?: string;
-  status?: string;
-  sort?: string;
-  order?: "asc" | "desc";
-}): Promise<Employee[] | PaginatedEmployees> => {
+getAll: async (params:any) => {
   try {
-    const { data } = await api.get("/employees", {
-      params,
-    });
-
-    /*
-      Supports both backend responses:
-
-      1.
-      [
-        employee1,
-        employee2
-      ]
-
-      2.
+    const { data } = await api.get(
+      "/employees",
       {
-        data: [],
-        total:100,
-        page:1,
-        pages:10
+        params,
       }
-    */
+    );
 
-    return data;
-  } catch (error) {
-    console.error("Failed to fetch employees:", error);
-
-    // fallback for mock data
+    return {
+      data: data.data,
+      total: data.pagination.total,
+      page: data.pagination.page,
+      pages: data.pagination.pages,
+      limit: data.pagination.limit,
+    };
+  } catch {
     let employees = [...demoStore];
 
     if (params?.status) {
       employees = employees.filter(
-        (emp) => emp.status === params.status
+        (e) => e.status === params.status
       );
     }
 
     if (params?.department) {
       employees = employees.filter(
-        (emp) =>
-          emp.department === params.department
+        (e) =>
+          e.department ===
+          params.department
       );
     }
 
     if (params?.role) {
       employees = employees.filter(
-        (emp) =>
-          emp.role === params.role
+        (e) =>
+          e.role === params.role
       );
     }
 
     if (params?.search) {
-      const search = params.search.toLowerCase();
+      const search =
+        params.search.toLowerCase();
 
       employees = employees.filter(
-        (emp) =>
-          emp.name.toLowerCase().includes(search) ||
-          emp.email.toLowerCase().includes(search)
+        (e) =>
+          e.name
+            .toLowerCase()
+            .includes(search) ||
+          e.email
+            .toLowerCase()
+            .includes(search)
       );
     }
 
@@ -129,7 +147,7 @@ export const employeeService = {
       return data;
     } catch {
       const newEmp: Employee = {
-        _id: `e${Date.now()}`,
+        id: `e${Date.now()}`,
         employeeId: payload.get('employeeId') as string,
         name: payload.get('name') as string,
         email: payload.get('email') as string,
@@ -154,7 +172,7 @@ export const employeeService = {
       const { data } = await api.put(`/employees/${id}`, payload, { headers: { 'Content-Type': 'multipart/form-data' } });
       return data;
     } catch {
-      const idx = demoStore.findIndex((e) => e._id === id);
+      const idx = demoStore.findIndex((e) => e.id === id);
       if (idx === -1) throw new Error('Employee not found');
       const updated = { ...demoStore[idx] };
       for (const [k, v] of payload.entries()) {
@@ -169,28 +187,28 @@ export const employeeService = {
     try {
       await api.delete(`/employees/${id}`);
     } catch {
-      demoStore = demoStore.filter((e) => e._id !== id);
+      demoStore = demoStore.filter((e) => e.id !== id);
     }
   },
+reportees: async (id: string): Promise<Employee[]> => {
+  try {
+    const { data } = await api.get(`/employees/${id}/reportees`);
 
-  reportees: async (id: string): Promise<Employee[]> => {
-    try {
-      const { data } = await api.get(`/employees/${id}/reportees`);
-      return data;
-    } catch {
-      return demoStore.filter((e) => e.reportingManager === id);
-    }
-  },
+    return data.data ?? [];
+  } catch {
+    return demoStore.filter((e) => e.reportingManager === id);
+  }
+},
 
   setManager: async (id: string, managerId: string): Promise<Employee> => {
     try {
       const { data } = await api.patch(`/employees/${id}/manager`, { reportingManager: managerId });
       return data;
     } catch {
-      const emp = demoStore.find((e) => e._id === id);
+      const emp = demoStore.find((e) => e.id === id);
       if (!emp) throw new Error('Employee not found');
       emp.reportingManager = managerId || null;
-      const mgr = demoStore.find((e) => e._id === managerId);
+      const mgr = demoStore.find((e) => e.id === managerId);
       emp.reportingManagerName = mgr?.name ?? null;
       return emp;
     }
@@ -206,19 +224,23 @@ export const employeeService = {
     }
   },
 
-  forest: async (): Promise<TreeNode[]> => {
-    try {
-      const { data } = await api.get('/organization/tree');
-      return [data];
-    } catch {
-      return demoForest;
-    }
-  },
+forest: async (): Promise<TreeNode[]> => {
+  try {
+    const { data } = await api.get("/organization/tree");
+
+    console.log("Organization API:", data);
+
+    return data.data;
+  } catch (err) {
+    console.error(err);
+    return demoForest;
+  }
+},
 
   dashboard: async (): Promise<DashboardStats> => {
     try {
       const { data } = await api.get('/dashboard/stats');
-      return data;
+       return data.data;
     } catch {
       const active = demoStore.filter((e) => e.status === 'active').length;
       const inactive = demoStore.filter((e) => e.status === 'inactive').length;

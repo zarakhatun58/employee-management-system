@@ -14,12 +14,12 @@ export function getLayoutedElements(
   direction: "TB" | "LR" = "TB"
 ) {
   dagreGraph.setGraph({
-    rankdir: direction,
-    nodesep: 60,
-    ranksep: 120,
-    marginx: 20,
-    marginy: 20,
-  });
+  rankdir: direction,
+  nodesep: 40,
+  ranksep: 60,
+  marginx: 10,
+  marginy: 10,
+});
 
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, {

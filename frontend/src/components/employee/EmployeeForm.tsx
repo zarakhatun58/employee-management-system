@@ -132,8 +132,8 @@ export default function EmployeeForm() {
       } else {
         const emp = await employeeService.create(fd);
         toast('success', 'Employee created');
-        if (emp._id) {
-          navigate(`/employees/${emp._id}`);
+        if (emp.id) {
+          navigate(`/employees/${emp.id}`);
         } else {
           navigate('/employees');
         }
@@ -155,7 +155,7 @@ export default function EmployeeForm() {
   const set = (k: keyof FormState, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
  const availableManagers=managers.filter(
-(m)=>m._id&&m._id!==id&&m.status==='active'
+(m)=>m.id&&m.id!==id&&m.status==='active'
 );
 
   return (
@@ -175,7 +175,7 @@ export default function EmployeeForm() {
             <div>
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                 <Upload className="h-4 w-4" /> Upload Photo
-                <input type="file" accept="image/*" className="hidden" onChange={onImage} />
+                <input id="uploadId" type="file" accept="image/*" className="hidden" onChange={onImage} />
               </label>
               <p className="mt-1 text-xs text-slate-400">JPG, PNG up to 2MB</p>
             </div>
@@ -183,66 +183,66 @@ export default function EmployeeForm() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <Label>Employee ID *</Label>
-              <Input value={form.employeeId} onChange={(e) => set('employeeId', e.target.value)} disabled={isEdit} />
+              <Label >Employee ID *</Label>
+              <Input id="employeeId" value={form.employeeId} onChange={(e) => set('employeeId', e.target.value)} disabled={isEdit} />
               {errors.employeeId && <p className="mt-1 text-xs text-rose-500">{errors.employeeId}</p>}
             </div>
             <div>
-              <Label>Full Name *</Label>
-              <Input value={form.name} onChange={(e) => set('name', e.target.value)} />
+              <Label htmlFor="name">Full Name *</Label>
+              <Input id="name" value={form.name} onChange={(e) => set('name', e.target.value)} />
               {errors.name && <p className="mt-1 text-xs text-rose-500">{errors.name}</p>}
             </div>
             <div>
-              <Label>Email *</Label>
-              <Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} />
+              <Label htmlFor="email">Email *</Label>
+              <Input id="email" type="email" value={form.email} onChange={(e) => set('email', e.target.value)} />
               {errors.email && <p className="mt-1 text-xs text-rose-500">{errors.email}</p>}
             </div>
             <div>
-              <Label>Phone *</Label>
-              <Input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+1 555-0100" />
+              <Label htmlFor="phone">Phone *</Label>
+              <Input id="phone" value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+1 555-0100" />
               {errors.phone && <p className="mt-1 text-xs text-rose-500">{errors.phone}</p>}
             </div>
             <div>
-              <Label>Department *</Label>
-              <Select value={form.department} onChange={(e) => set('department', e.target.value)}>
+              <Label htmlFor="department">Department *</Label>
+              <Select id="department" value={form.department} onChange={(e) => set('department', e.target.value)}>
                 <option value="">Select...</option>
                 {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
               </Select>
               {errors.department && <p className="mt-1 text-xs text-rose-500">{errors.department}</p>}
             </div>
             <div>
-              <Label>Designation *</Label>
-              <Input value={form.designation} onChange={(e) => set('designation', e.target.value)} />
+              <Label  htmlFor="designation">Designation *</Label>
+              <Input id="designation" value={form.designation} onChange={(e) => set('designation', e.target.value)} />
               {errors.designation && <p className="mt-1 text-xs text-rose-500">{errors.designation}</p>}
             </div>
             <div>
-              <Label>Salary (USD) *</Label>
-              <Input type="number" min="0" value={form.salary} onChange={(e) => set('salary', e.target.value)} />
+              <Label htmlFor="salary">Salary (USD) *</Label>
+              <Input id="salary" type="number" min="0" value={form.salary} onChange={(e) => set('salary', e.target.value)} />
               {errors.salary && <p className="mt-1 text-xs text-rose-500">{errors.salary}</p>}
             </div>
             <div>
-              <Label>Joining Date *</Label>
-              <Input type="date" value={form.joiningDate} onChange={(e) => set('joiningDate', e.target.value)} />
+              <Label htmlFor="joiningDate">Joining Date *</Label>
+              <Input id="joiningDate" type="date" value={form.joiningDate} onChange={(e) => set('joiningDate', e.target.value)} />
               {errors.joiningDate && <p className="mt-1 text-xs text-rose-500">{errors.joiningDate}</p>}
             </div>
             <div>
-              <Label>Status</Label>
-              <Select value={form.status} onChange={(e) => set('status', e.target.value)}>
+              <Label htmlFor="status">Status</Label>
+              <Select id="status" value={form.status} onChange={(e) => set('status', e.target.value)}>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </Select>
             </div>
             <div>
-              <Label>Role</Label>
-              <Select value={form.role} onChange={(e) => set('role', e.target.value)}>
+              <Label htmlFor="role">Role</Label>
+              <Select id="role" value={form.role} onChange={(e) => set('role', e.target.value)}>
                 {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
               </Select>
             </div>
             <div className="sm:col-span-2">
-              <Label>Reporting Manager</Label>
-              <Select value={form.reportingManager} onChange={(e) => set('reportingManager', e.target.value)}>
+              <Label htmlFor="reportingManager">Reporting Manager</Label>
+              <Select id="reportingManager" value={form.reportingManager} onChange={(e) => set('reportingManager', e.target.value)}>
                 <option value="">None (top-level)</option>
-                {availableManagers.map((m) => <option key={m._id} value={m._id}>{m.name} — {m.designation}</option>)}
+                {availableManagers.map((m) => <option key={m.id} value={m.id}>{m.name} — {m.designation}</option>)}
               </Select>
             </div>
           </div>
