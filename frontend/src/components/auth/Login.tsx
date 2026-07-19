@@ -180,6 +180,7 @@ export default function Login() {
                 <Label htmlFor="name">Name</Label>
                 <Input
                 id="name"
+                type="text"
                   value={name}
                   onChange={(e) => {
                     setName(e.target.value);
@@ -197,7 +198,7 @@ export default function Login() {
                 </p>
               )}
               <div>
-                <Label htmlFor="regEmail">Email</Label><Input
+                <Label htmlFor="regEmail">Email</Label><Input required
                 id="regEmail"
                   type="email"
                   value={registerEmail}
