@@ -2,7 +2,9 @@ import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '../store/auth.store';
 
 const api = axios.create({
-baseURL: 'https://employee-management-system-enig.onrender.com/api',
+baseURL:
+  import.meta.env.VITE_API_URL ??
+  "http://localhost:5000/api",
     headers: {
     "Content-Type": "application/json",
   },
